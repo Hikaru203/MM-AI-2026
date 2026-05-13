@@ -13,7 +13,7 @@ export default function StatsPage() {
 
   const stats = useMemo(() => {
     const total = expenses.reduce((acc, curr) => acc + curr.amount, 0);
-    
+
     // Category Breakdown
     const categories: Record<string, number> = {};
     expenses.forEach(exp => {
@@ -27,7 +27,8 @@ export default function StatsPage() {
     // Location Breakdown
     const locations: Record<string, number> = {};
     expenses.forEach(exp => {
-      locations[exp.location] = (locations[exp.location] || 0) + 1;
+      const loc = exp.location || 'Không xác định';
+      locations[loc] = (locations[loc] || 0) + 1;
     });
 
     const locationData = Object.entries(locations)
@@ -68,7 +69,7 @@ export default function StatsPage() {
             <ChartIcon className="w-5 h-5 text-purple-400" />
             <h3 className="text-lg font-bold">Theo danh mục</h3>
           </div>
-          
+
           <div className="space-y-6">
             {stats.categoryData.length === 0 ? (
               <p className="text-center text-gray-500 py-10 italic">Chưa có dữ liệu chi tiêu</p>
@@ -80,7 +81,7 @@ export default function StatsPage() {
                     <span className="font-bold">{formatCurrency(cat.amount)} ({cat.percent.toFixed(0)}%)</span>
                   </div>
                   <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden">
-                    <motion.div 
+                    <motion.div
                       initial={{ width: 0 }}
                       animate={{ width: `${cat.percent}%` }}
                       transition={{ delay: i * 0.1, duration: 1 }}
@@ -99,13 +100,13 @@ export default function StatsPage() {
             <MapPin className="w-5 h-5 text-orange-400" />
             <h3 className="text-lg font-bold">Địa điểm quen thuộc</h3>
           </div>
-          
+
           <div className="grid grid-cols-1 gap-3">
             {stats.locationData.length === 0 ? (
               <p className="text-center text-gray-500 py-10 italic">Chưa có địa điểm nào</p>
             ) : (
               stats.locationData.map((loc, i) => (
-                <motion.div 
+                <motion.div
                   key={loc.name}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}

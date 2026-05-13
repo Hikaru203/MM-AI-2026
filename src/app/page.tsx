@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wallet, TrendingUp, Sparkles, Plus, Settings } from 'lucide-react';
+import { Expense } from '@/types';
 
 import { Navbar } from '@/components/layout/Navbar';
 import { FloatingAddButton } from '@/components/layout/FloatingAddButton';
@@ -34,7 +35,7 @@ export default function HomePage() {
     }
   };
 
-  const [pendingExpense, setPendingExpense] = useState<any>(null);
+  const [pendingExpense, setPendingExpense] = useState<any | null>(null);
   const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -338,7 +339,7 @@ export default function HomePage() {
                           ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
                           const base64Thumbnail = canvas.toDataURL('image/jpeg', 0.7);
                           
-                          setPendingExpense(prev => prev ? {
+                          setPendingExpense((prev: any) => prev ? {
                             ...prev,
                             imageUrl: base64Thumbnail
                           } : null);

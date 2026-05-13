@@ -6,7 +6,7 @@ interface AppState {
   expenses: Expense[];
   wallets: Wallet[];
   isLoading: boolean;
-
+  monthlyGoal: number;
   privacyMode: boolean;
   darkMode: boolean;
   addExpense: (expense: Expense) => void;
@@ -18,11 +18,6 @@ interface AppState {
   setPrivacyMode: (val: boolean) => void;
   setDarkMode: (val: boolean) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
-
-
-
-
-
 }
 
 export const useAppStore = create<AppState>()(
