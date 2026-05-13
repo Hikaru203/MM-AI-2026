@@ -21,8 +21,8 @@ export async function callOpenRouter(messages: any[], preferredModel: string = "
         method: "POST",
         headers: {
           "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-          "HTTP-Referer": "http://localhost:3000",
-          "X-Title": "MoneyMemory",
+          "HTTP-Referer": process.env.NEXTAUTH_URL || "http://localhost:3000",
+          "X-Title": "MemoryMoney",
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
