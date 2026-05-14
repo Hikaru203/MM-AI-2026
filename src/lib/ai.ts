@@ -53,10 +53,10 @@ export async function processReceiptWithOpenRouter(imageBuffer: Buffer, mimeType
   const prompt = `
     Analyze this receipt/photo. Extract:
     1. Total Amount (number only).
-    2. Location/Merchant name.
+    2. Location/Merchant name (short).
     3. Category (Ăn uống, Cafe, Shopping, Di chuyển, Công việc, Giải trí, Khác).
-    4. A catchy Instagram-style caption in Vietnamese.
-    5. A mood based on the photo (vui vẻ, thư giãn, sang chảnh, tiết kiệm, bận rộn, buồn, hối hận).
+    4. A VERY SHORT, catchy Instagram-style caption in Vietnamese (max 10 words, use emojis).
+    5. A mood (vui vẻ, thư giãn, sang chảnh, tiết kiệm, bận rộn, buồn, hối hận).
 
     Return ONLY the result in JSON format:
     {
@@ -90,13 +90,14 @@ export async function processReceiptWithOpenRouter(imageBuffer: Buffer, mimeType
 
 export async function getChatResponseWithOpenRouter(history: { role: string; text: string }[], userInput: string, expenses: any[] = []) {
   const contextPrompt = `
-    You are MoneyMemory AI, a concise and helpful personal finance assistant.
+    You are MoneyMemory AI, a very concise personal finance assistant.
     Current Date: ${new Date().toLocaleDateString('vi-VN')}
     
     GUIDELINES:
-    1. Be concise and direct.
-    2. Use the provided spending data: ${JSON.stringify(expenses)}
-    3. Friendly tone, small poetic touch (2-3 lines).
+    1. Be extremely concise. Max 2-3 short sentences.
+    2. Answer directly without filler words like "Chào bạn", "Tôi có thể giúp gì".
+    3. Use spending data: ${JSON.stringify(expenses)}
+    4. Use 1-2 relevant emojis.
     
     USER QUESTION: ${userInput}
   `;
