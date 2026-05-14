@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
 import { uploadToGoogleDrive } from '@/lib/google-drive';
+import { auth } from '@/auth';
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const { messages, chatId } = await request.json();
 
     if (!messages || !Array.isArray(messages)) {
@@ -22,9 +26,9 @@ export async function POST(request: Request) {
       markdown += `### ${role}\n${msg.text}\n\n`;
     });
 
-    // Upload to Google Drive in a "Chats" subfolder (simulated by filename prefix)
+    // Upload to Google Drive
     const fileName = `chat_${chatId || Date.now()}.md`;
-    await uploadToGoogleDrive(fileName, markdown);
+    await uploadToGoogleDrive(fileName, markdown, 'text/markdown', userId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

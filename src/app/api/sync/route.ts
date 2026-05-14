@@ -1,11 +1,15 @@
 import { NextResponse } from 'next/server';
 import { uploadToGoogleDrive } from '@/lib/google-drive';
 import { generateExpenseMarkdown } from '@/lib/sync';
+import { auth } from '@/auth';
 
 export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const formData = await request.formData();
     const expenseDataStr = formData.get('expense') as string;
     const imageFile = formData.get('image') as File | null;
@@ -25,7 +29,8 @@ export async function POST(request: Request) {
       const imageRes = await uploadToGoogleDrive(
         `img_${expense.id}_${imageFile.name}`,
         buffer,
-        imageFile.type
+        imageFile.type,
+        userId
       );
       imageFileId = imageRes.id || '';
       imageUrl = imageRes.link || '';
@@ -36,7 +41,7 @@ export async function POST(request: Request) {
     const markdown = generateExpenseMarkdown(updatedExpense);
 
     // 3. Upload Markdown
-    await uploadToGoogleDrive(`expense_${expense.id}.md`, markdown);
+    await uploadToGoogleDrive(`expense_${expense.id}.md`, markdown, 'text/markdown', userId);
 
     return NextResponse.json({ success: true, imageUrl, imageFileId });
 
