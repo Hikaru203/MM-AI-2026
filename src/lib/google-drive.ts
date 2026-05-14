@@ -18,12 +18,11 @@ export async function uploadToGoogleDrive(
     throw new Error('Google Service Account credentials missing in environment variables');
   }
 
-  const auth = new google.auth.JWT(
-    clientEmail,
-    undefined,
-    privateKey,
-    ['https://www.googleapis.com/auth/drive.file']
-  );
+  const auth = new google.auth.JWT({
+    email: clientEmail,
+    key: privateKey,
+    scopes: ['https://www.googleapis.com/auth/drive.file'],
+  });
 
   const drive = google.drive({ version: 'v3', auth });
 
