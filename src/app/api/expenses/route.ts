@@ -33,11 +33,11 @@ export const POST = auth(async (req) => {
     const expense = await prisma.expense.create({
       data: {
         amount: parseFloat(amount),
-        category,
-        walletId,
+        category: category || 'Khác',
+        walletId: walletId || '1',
         imageUrl,
         note,
-        mood,
+        mood: mood || 'bình thường',
         location,
         aiSummary,
         createdAt: createdAt ? new Date(createdAt) : new Date(),
