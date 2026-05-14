@@ -10,12 +10,20 @@ export async function uploadToGoogleDrive(
   mimeType: string = 'text/markdown',
   userId?: string
 ) {
-  // Use Service Account credentials from ENV
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  // Handle both literal newlines and escaped \n, also remove accidental quotes
-  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
-    ?.replace(/^"|"$/g, '') 
-    ?.replace(/\\n/g, '\n');
+  const base64Key = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_BASE64;
+  
+  let privateKey = '';
+
+  if (base64Key) {
+    // Decode Base64 key (The most robust way for environment variables)
+    privateKey = Buffer.from(base64Key, 'base64').toString('utf8');
+  } else {
+    // Fallback to plain text key (legacy)
+    privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
+      ?.replace(/^"|"$/g, '') 
+      ?.replace(/\\n/g, '\n') || '';
+  }
 
   if (!clientEmail || !privateKey) {
     throw new Error('Google Service Account credentials missing in environment variables');
@@ -31,9 +39,6 @@ export async function uploadToGoogleDrive(
 
   try {
     // 1. Get or Create main "MoneyMemory" folder
-    // Note: The Service Account can only see folders shared with it.
-    // We assume the user has shared a folder named "MoneyMemory" with the Service Account email.
-    
     let rootFolderId = '';
     const rootFolderRes = await drive.files.list({
       q: "name = 'MoneyMemory' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
@@ -43,7 +48,6 @@ export async function uploadToGoogleDrive(
     if (rootFolderRes.data.files && rootFolderRes.data.files.length > 0) {
       rootFolderId = rootFolderRes.data.files[0].id!;
     } else {
-      // If not found, try to create it (but it's better if the user shares an existing one)
       const folder = await drive.files.create({
         requestBody: {
           name: 'MoneyMemory',
