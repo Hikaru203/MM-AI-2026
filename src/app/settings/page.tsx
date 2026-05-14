@@ -166,15 +166,23 @@ export default function SettingsPage() {
           <div>
             <h3 className="text-xs font-bold text-red-500/50 uppercase tracking-widest px-2 mb-4">Vùng nguy hiểm</h3>
             <button
-              onClick={() => {
+              onClick={async (e) => {
                 if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Dữ liệu sẽ được ẩn đi nhưng vẫn lưu trên hệ thống.')) {
-                  fetch('/api/user/clear-data', { method: 'POST' })
-                    .then(() => {
-                      clearExpenses();
-                      alert('Đã ẩn toàn bộ dữ liệu!');
-                      window.location.reload();
-                    })
-                    .catch(() => alert('Có lỗi xảy ra khi xóa dữ liệu.'));
+                  const btn = e.currentTarget;
+                  const originalContent = btn.innerHTML;
+                  btn.disabled = true;
+                  btn.innerHTML = '<div class="flex items-center justify-center gap-2 w-full"><div class="w-4 h-4 border-2 border-red-500 border-t-transparent rounded-full animate-spin"></div><span>Đang xóa...</span></div>';
+                  
+                  try {
+                    await fetch('/api/user/clear-data', { method: 'POST' });
+                    clearExpenses();
+                    alert('Đã ẩn toàn bộ dữ liệu!');
+                    window.location.reload();
+                  } catch (err) {
+                    alert('Có lỗi xảy ra khi xóa dữ liệu.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                  }
                 }
               }}
               className="w-full flex items-center gap-4 p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-500 active:scale-95 transition-transform"

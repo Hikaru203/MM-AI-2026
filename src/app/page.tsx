@@ -20,6 +20,7 @@ export default function HomePage() {
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleEditGoal = async () => {
     const newGoalStr = prompt('Nhập mục tiêu chi tiêu tháng này (VND):', monthlyGoal.toString());
@@ -113,7 +114,8 @@ export default function HomePage() {
   };
 
   const handleConfirm = async () => {
-    if (pendingExpense) {
+    if (pendingExpense && !isSaving) {
+      setIsSaving(true);
       const finalAmount = isNaN(pendingExpense.amount) ? 0 : pendingExpense.amount;
       const expenseToSave = {
         ...pendingExpense,
@@ -188,6 +190,7 @@ export default function HomePage() {
       setPendingExpense(null);
       setPreviewUrl(null);
       setSelectedFile(null);
+      setIsSaving(false);
     }
   };
 
@@ -512,9 +515,17 @@ export default function HomePage() {
                 </button>
                 <button
                   onClick={handleConfirm}
-                  className="flex-[2] py-4 bg-primary rounded-2xl font-bold shadow-lg shadow-purple-600/20"
+                  disabled={isSaving}
+                  className={`flex-[2] py-4 rounded-2xl font-bold shadow-lg shadow-purple-600/20 transition-all ${isSaving ? 'bg-primary/50 cursor-not-allowed' : 'bg-primary active:scale-95'}`}
                 >
-                  Xác nhận lưu
+                  {isSaving ? (
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Đang lưu...</span>
+                    </div>
+                  ) : (
+                    'Xác nhận lưu'
+                  )}
                 </button>
               </div>
             </motion.div>

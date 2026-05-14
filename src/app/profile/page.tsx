@@ -68,15 +68,23 @@ export default function ProfilePage() {
           <div className="pt-4 space-y-4">
 
             <button
-              onClick={() => {
+              onClick={async (e) => {
                 if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu chi tiêu trên máy này? Dữ liệu sẽ được ẩn đi nhưng vẫn lưu trên Drive.')) {
-                  fetch('/api/user/clear-data', { method: 'POST' })
-                    .then(() => {
-                      clearExpenses();
-                      alert('Đã ẩn dữ liệu thành công!');
-                      window.location.reload();
-                    })
-                    .catch(() => alert('Có lỗi xảy ra.'));
+                  const btn = e.currentTarget;
+                  const originalContent = btn.innerHTML;
+                  btn.disabled = true;
+                  btn.innerHTML = '<span>Đang xóa...</span>';
+                  
+                  try {
+                    await fetch('/api/user/clear-data', { method: 'POST' });
+                    clearExpenses();
+                    alert('Đã ẩn dữ liệu thành công!');
+                    window.location.reload();
+                  } catch (err) {
+                    alert('Có lỗi xảy ra.');
+                    btn.disabled = false;
+                    btn.innerHTML = originalContent;
+                  }
                 }
               }}
               className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 text-gray-400 font-bold border border-white/10 active:scale-95 transition-transform"
