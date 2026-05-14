@@ -15,23 +15,45 @@ import { useSession } from "next-auth/react";
 
 export default function HomePage() {
   const { data: session } = useSession();
-  const { expenses, wallets, addExpense, clearExpenses, monthlyGoal, setMonthlyGoal, updateWallet, privacyMode, updateExpense } = useAppStore();
+  const { expenses, wallets, addExpense, clearExpenses, monthlyGoal, setMonthlyGoal, updateWallet, privacyMode, updateExpense, updateWalletBalance } = useAppStore();
 
 
   const [showAddModal, setShowAddModal] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleEditGoal = () => {
-    const newGoal = prompt('Nhập mục tiêu chi tiêu tháng này (VND):', monthlyGoal.toString());
-    if (newGoal !== null) {
-      setMonthlyGoal(parseInt(newGoal) || 0);
+  const handleEditGoal = async () => {
+    const newGoalStr = prompt('Nhập mục tiêu chi tiêu tháng này (VND):', monthlyGoal.toString());
+    if (newGoalStr !== null) {
+      const newGoal = parseInt(newGoalStr) || 0;
+      setMonthlyGoal(newGoal);
+      
+      try {
+        await fetch('/api/user/settings', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ monthlyGoal: newGoal }),
+        });
+      } catch (error) {
+        console.error('Error updating goal:', error);
+      }
     }
   };
 
-  const handleEditWallet = (id: string, currentBalance: number, name: string) => {
-    const newBalance = prompt(`Nhập số dư mới cho ví ${name} (VND):`, currentBalance.toString());
-    if (newBalance !== null) {
-      updateWallet(id, { balance: parseInt(newBalance) || 0 });
+  const handleEditWallet = async (id: string, currentBalance: number, name: string) => {
+    const newBalanceStr = prompt(`Nhập số dư mới cho ví ${name} (VND):`, currentBalance.toString());
+    if (newBalanceStr !== null) {
+      const newBalance = parseInt(newBalanceStr) || 0;
+      updateWallet(id, { balance: newBalance });
+      
+      try {
+        await fetch('/api/wallets', {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id, balance: newBalance }),
+        });
+      } catch (error) {
+        console.error('Error updating wallet:', error);
+      }
     }
   };
 
@@ -99,16 +121,37 @@ export default function HomePage() {
         imageUrl: previewUrl || pendingExpense.imageUrl
       };
 
-      // 1. Save to local store immediately
-      addExpense(expenseToSave);
+      // 1. Save to SQLite via API
+      try {
+        const res = await fetch('/api/expenses', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(expenseToSave),
+        });
+        
+        if (res.ok) {
+          const savedExpense = await res.json();
+          addExpense(savedExpense);
+          
+          // Update local wallet balance to match DB
+          updateWalletBalance(expenseToSave.walletId, finalAmount);
+        } else {
+          // Fallback to local only if API fails (optional)
+          addExpense(expenseToSave);
+          updateWalletBalance(expenseToSave.walletId, finalAmount);
+        }
+      } catch (error) {
+        console.error('Error saving to SQLite:', error);
+        addExpense(expenseToSave);
+        updateWalletBalance(expenseToSave.walletId, finalAmount);
+      }
 
-      // 2. Sync to Google Drive with final data and image
+      // 2. Sync to Google Drive (Original logic)
       const formData = new FormData();
       formData.append('expense', JSON.stringify(expenseToSave));
       if (selectedFile) {
         formData.append('image', selectedFile);
       }
-
 
       // Close modal and reset state
       setShowConfirmModal(false);
@@ -120,24 +163,27 @@ export default function HomePage() {
         });
         
         if (res.status === 401) {
-          alert('Phiên làm việc với Google đã hết hạn. Khoản chi đã được lưu tạm trên máy, hãy đăng xuất và đăng nhập lại để đồng bộ lên Drive nhé! ⚠️');
+          alert('Phiên làm việc với Google đã hết hạn. Khoản chi đã được lưu vào máy, hãy đăng xuất và đăng nhập lại để đồng bộ lên Drive nhé! ⚠️');
           return;
         }
 
         const data = await res.json();
         
         if (data.imageFileId) {
-          // Update with a persistent Proxy link
           const driveProxyUrl = `/api/drive-image?id=${data.imageFileId}`;
           updateExpense(expenseToSave.id, { imageUrl: driveProxyUrl });
+          
+          // Optional: Update image URL in SQLite too
+          fetch(`/api/expenses/${expenseToSave.id}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ imageUrl: driveProxyUrl }),
+          }).catch(console.error);
         }
-
 
       } catch (error) {
         console.error('Final Sync Error:', error);
       }
-
-
 
       setPendingExpense(null);
       setPreviewUrl(null);

@@ -11,6 +11,7 @@ interface AppState {
   darkMode: boolean;
   addExpense: (expense: Expense) => void;
   setExpenses: (expenses: Expense[]) => void;
+  setWallets: (wallets: Wallet[]) => void;
   clearExpenses: () => void;
   updateWalletBalance: (walletId: string, amount: number) => void;
   updateWallet: (walletId: string, updates: Partial<Wallet>) => void;
@@ -18,39 +19,34 @@ interface AppState {
   setPrivacyMode: (val: boolean) => void;
   setDarkMode: (val: boolean) => void;
   updateExpense: (id: string, updates: Partial<Expense>) => void;
+  setLoading: (loading: boolean) => void;
 }
 
 export const useAppStore = create<AppState>()(
   persist(
     (set) => ({
       expenses: [],
-      wallets: [
-        { id: '1', name: 'Tiền mặt', balance: 0, type: 'Cash' },
-        { id: '2', name: 'Momo', balance: 0, type: 'Digital' },
-        { id: '3', name: 'Techcombank', balance: 0, type: 'Bank' },
-      ],
+      wallets: [],
 
       isLoading: false,
       monthlyGoal: 0,
       privacyMode: false,
       darkMode: true,
 
-
       addExpense: (expense) => set((state) => ({ 
         expenses: [expense, ...state.expenses] 
       })),
 
-
       setExpenses: (expenses) => set({ expenses }),
+
+      setWallets: (wallets) => set({ wallets }),
+
+      setLoading: (loading) => set({ isLoading: loading }),
 
       clearExpenses: () => set({ 
         expenses: [],
         monthlyGoal: 0,
-        wallets: [
-          { id: '1', name: 'Tiền mặt', balance: 0, type: 'Cash' },
-          { id: '2', name: 'Momo', balance: 0, type: 'Digital' },
-          { id: '3', name: 'Techcombank', balance: 0, type: 'Bank' },
-        ]
+        wallets: []
       }),
 
       updateWalletBalance: (walletId, amount) => set((state) => ({
@@ -76,14 +72,9 @@ export const useAppStore = create<AppState>()(
           String(e.id) === String(id) ? { ...e, ...updates } : e
         )
       })),
-
-
-
-
-
     }),
     {
-      name: 'money-memory-storage',
+      name: 'money-memory-storage-v2', // New name to avoid collision with old data
     }
   )
 );
