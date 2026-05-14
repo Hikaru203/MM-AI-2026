@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { google } from 'googleapis';
 import { auth } from '@/auth';
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   try {
     const session: any = await auth();

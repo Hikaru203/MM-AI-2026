@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import { getChatResponseWithOpenRouter } from '@/lib/ai';
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const { messages, expenses } = await request.json();

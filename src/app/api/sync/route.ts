@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { uploadToGoogleDrive } from '@/lib/google-drive';
 import { generateExpenseMarkdown } from '@/lib/sync';
 
+export const dynamic = "force-dynamic";
+
 export async function POST(request: Request) {
   try {
     const formData = await request.formData();
