@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 export const GET = auth(async (req) => {
   if (!req.auth?.user?.id) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
