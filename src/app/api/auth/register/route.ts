@@ -43,7 +43,11 @@ export async function POST(req: Request) {
   } catch (error: any) {
     console.error("Registration error:", error);
     return NextResponse.json(
-      { message: "Đã xảy ra lỗi trong quá trình đăng ký" },
+      { 
+        message: "Đã xảy ra lỗi trong quá trình đăng ký", 
+        debug: error.message || "Unknown error",
+        error: error
+      },
       { status: 500 }
     );
   }
