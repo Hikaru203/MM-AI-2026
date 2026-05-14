@@ -38,24 +38,27 @@ export async function uploadToGoogleDrive(
   const drive = google.drive({ version: 'v3', auth });
 
   try {
-    // 1. Get or Create main "MoneyMemory" folder
-    let rootFolderId = '';
-    const rootFolderRes = await drive.files.list({
-      q: "name = 'MoneyMemory' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
-      fields: 'files(id)',
-    });
-
-    if (rootFolderRes.data.files && rootFolderRes.data.files.length > 0) {
-      rootFolderId = rootFolderRes.data.files[0].id!;
-    } else {
-      const folder = await drive.files.create({
-        requestBody: {
-          name: 'MoneyMemory',
-          mimeType: 'application/vnd.google-apps.folder',
-        },
-        fields: 'id',
+    // 1. Get or Use main "MoneyMemory" folder
+    let rootFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    
+    if (!rootFolderId) {
+      const rootFolderRes = await drive.files.list({
+        q: "name = 'MoneyMemory' and mimeType = 'application/vnd.google-apps.folder' and trashed = false",
+        fields: 'files(id)',
       });
-      rootFolderId = folder.data.id!;
+
+      if (rootFolderRes.data.files && rootFolderRes.data.files.length > 0) {
+        rootFolderId = rootFolderRes.data.files[0].id!;
+      } else {
+        const folder = await drive.files.create({
+          requestBody: {
+            name: 'MoneyMemory',
+            mimeType: 'application/vnd.google-apps.folder',
+          },
+          fields: 'id',
+        });
+        rootFolderId = folder.data.id!;
+      }
     }
 
     // 2. Get or Create User-specific subfolder
