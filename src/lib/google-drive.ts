@@ -12,7 +12,10 @@ export async function uploadToGoogleDrive(
 ) {
   // Use Service Account credentials from ENV
   const clientEmail = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
-  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY?.replace(/\\n/g, '\n');
+  // Handle both literal newlines and escaped \n, also remove accidental quotes
+  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_KEY
+    ?.replace(/^"|"$/g, '') 
+    ?.replace(/\\n/g, '\n');
 
   if (!clientEmail || !privateKey) {
     throw new Error('Google Service Account credentials missing in environment variables');
