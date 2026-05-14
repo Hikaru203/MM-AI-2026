@@ -11,7 +11,10 @@ export const GET = auth(async (req) => {
 
   try {
     let wallets = await prisma.wallet.findMany({
-      where: { userId: req.auth.user.id },
+      where: { 
+        userId: req.auth.user.id,
+        status: 'ACTIVE'
+      },
     });
 
     // If user has no wallets, create defaults
@@ -27,7 +30,10 @@ export const GET = auth(async (req) => {
       });
 
       wallets = await prisma.wallet.findMany({
-        where: { userId: req.auth.user.id },
+        where: { 
+          userId: req.auth.user.id,
+          status: 'ACTIVE'
+        },
       });
     }
 

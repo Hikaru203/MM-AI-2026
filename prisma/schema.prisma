@@ -66,6 +66,7 @@ model Wallet {
   balance   Float
   type      String
   userId    String
+  status    String    @default("ACTIVE") // ACTIVE, HIDDEN
   user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   expenses  Expense[]
 }
@@ -82,6 +83,7 @@ model Expense {
   aiSummary   String?
   createdAt   DateTime @default(now())
   userId      String
+  status      String   @default("ACTIVE") // ACTIVE, HIDDEN
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   wallet      Wallet   @relation(fields: [walletId], references: [id], onDelete: Cascade)
 }

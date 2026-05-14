@@ -167,9 +167,14 @@ export default function SettingsPage() {
             <h3 className="text-xs font-bold text-red-500/50 uppercase tracking-widest px-2 mb-4">Vùng nguy hiểm</h3>
             <button
               onClick={() => {
-                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Hành động này không thể hoàn tác.')) {
-                  clearExpenses();
-                  alert('Đã xóa sạch dữ liệu!');
+                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu? Dữ liệu sẽ được ẩn đi nhưng vẫn lưu trên hệ thống.')) {
+                  fetch('/api/user/clear-data', { method: 'POST' })
+                    .then(() => {
+                      clearExpenses();
+                      alert('Đã ẩn toàn bộ dữ liệu!');
+                      window.location.reload();
+                    })
+                    .catch(() => alert('Có lỗi xảy ra khi xóa dữ liệu.'));
                 }
               }}
               className="w-full flex items-center gap-4 p-4 rounded-2xl bg-red-500/5 border border-red-500/10 text-red-500 active:scale-95 transition-transform"

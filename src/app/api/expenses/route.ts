@@ -11,7 +11,10 @@ export const GET = auth(async (req) => {
 
   try {
     const expenses = await prisma.expense.findMany({
-      where: { userId: req.auth.user.id },
+      where: { 
+        userId: req.auth.user.id,
+        status: 'ACTIVE'
+      },
       orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(expenses);

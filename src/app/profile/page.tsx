@@ -69,16 +69,21 @@ export default function ProfilePage() {
 
             <button
               onClick={() => {
-                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu chi tiêu trên máy này?')) {
-                  clearExpenses();
-                  alert('Đã xóa dữ liệu!');
+                if (confirm('Bạn có chắc chắn muốn xóa toàn bộ dữ liệu chi tiêu trên máy này? Dữ liệu sẽ được ẩn đi nhưng vẫn lưu trên Drive.')) {
+                  fetch('/api/user/clear-data', { method: 'POST' })
+                    .then(() => {
+                      clearExpenses();
+                      alert('Đã ẩn dữ liệu thành công!');
+                      window.location.reload();
+                    })
+                    .catch(() => alert('Có lỗi xảy ra.'));
                 }
               }}
               className="w-full flex items-center justify-between p-4 rounded-2xl bg-white/5 text-gray-400 font-bold border border-white/10 active:scale-95 transition-transform"
             >
               <div className="flex items-center gap-4">
                 <Settings className="w-5 h-5" />
-                <span>Xóa toàn bộ dữ liệu mẫu</span>
+                <span>Xóa toàn bộ dữ liệu</span>
               </div>
             </button>
 
